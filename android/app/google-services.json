@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "682177479135",
+    "project_id": "portefy-11146",
+    "storage_bucket": "portefy-11146.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:682177479135:android:4fe897c0ab6d5c69ccc46a",
+        "android_client_info": {
+          "package_name": "com.example.portefy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "682177479135-st4ikf8jlbc1dhv2dln85k61a7hkbfu8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.portefy",
+            "certificate_hash": "ad01778943bf50a8de6442d5909593f87714291d"
+          }
+        },
+        {
+          "client_id": "682177479135-1j6321ogo31ackgn1eut9lroeiaec28f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgudcymSA0UIZ4oq2F37inLlvpguHXtfk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "682177479135-1j6321ogo31ackgn1eut9lroeiaec28f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "682177479135-dua6d7351l88rce3c9sihdqkn75bdsgo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.portefy"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

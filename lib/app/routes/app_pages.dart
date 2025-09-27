@@ -1,8 +1,6 @@
 import 'package:get/get.dart';
 import 'package:portefy/app/modules/notifications/views/notifications_view.dart';
 import '../modules/portfolio/views/add_portfolio_item.dart';
-import '../modules/portfolio/views/cv_preview_view.dart';
-import '../modules/portfolio/views/cv_templates_view.dart';
 import '../modules/posts/bindings/post_binding.dart';
 import '../modules/search/bindings/search_binding.dart';
 import '../modules/search/views/search_view.dart';
@@ -115,14 +113,7 @@ class AppPages {
       page: () => PortfolioView(),
       binding: PortfolioBinding(),
     ),
-    GetPage(name: AppRoutes.CV_TEMPLATES, page: () => CvTemplatesView()),
-    GetPage(
-      name: AppRoutes.CV_PREVIEW,
-      page: () {
-        final args = Get.arguments as Map<String, dynamic>;
-        return CvPreviewView();
-      },
-    ),
+    
     GetPage(
       name: AppRoutes.ADD_PORTFOLIO_ITEM,
       page: () => AddPortfolioItemView(),

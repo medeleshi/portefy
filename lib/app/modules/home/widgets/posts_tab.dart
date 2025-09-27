@@ -340,15 +340,18 @@ class PostsTab extends StatelessWidget {
               ),
             ],
           ),
-          child: CircleAvatar(
-            radius: 22,
-            backgroundColor: AppColors.primary.withOpacity(0.1),
-            backgroundImage: post.authorAvatar != null
-                ? CachedNetworkImageProvider(post.authorAvatar!)
-                : null,
-            child: post.authorAvatar == null
-                ? Icon(Icons.person, color: AppColors.primary, size: 24)
-                : null,
+          child: InkWell(
+            onTap: () => Get.toNamed(AppRoutes.PORTFOLIO, arguments: {'userId': post.userId}),
+            child: CircleAvatar(
+              radius: 22,
+              backgroundColor: AppColors.primary.withOpacity(0.1),
+              backgroundImage: post.authorAvatar != null
+                  ? CachedNetworkImageProvider(post.authorAvatar!)
+                  : null,
+              child: post.authorAvatar == null
+                  ? Icon(Icons.person, color: AppColors.primary, size: 24)
+                  : null,
+            ),
           ),
         ),
         SizedBox(width: 12),

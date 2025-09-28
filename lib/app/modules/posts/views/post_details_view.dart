@@ -488,9 +488,6 @@ class PostDetailsView extends GetView<PostsController> {
           ),
           TextButton(
             onPressed: () {
-              Get.back();
-              controller.deletePost(post.id);
-              Get.back();
             },
             child: Text('حذف', style: TextStyle(color: Colors.red)),
           ),

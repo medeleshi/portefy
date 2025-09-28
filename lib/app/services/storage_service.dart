@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 import 'package:crypto/crypto.dart';
 
 class StorageService extends GetxService {
@@ -35,6 +36,9 @@ class StorageService extends GetxService {
   // Upload post image
   Future<String> uploadPostImage(File imageFile) async {
     try {
+      // Compress image before upload
+      final compressedFile = await compressImage(imageFile);
+
       final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       final params = {
         'folder': 'posts',
@@ -55,7 +59,7 @@ class StorageService extends GetxService {
       // Add file
       final multipartFile = await http.MultipartFile.fromPath(
         'file',
-        imageFile.path,
+        compressedFile.path,
       );
       request.files.add(multipartFile);
       
@@ -70,6 +74,33 @@ class StorageService extends GetxService {
       }
     } catch (e) {
       throw 'فشل رفع الصورة: ${e.toString()}';
+    }
+  }
+
+
+  // Compress image before upload
+  Future<File> compressImage(File imageFile, {int quality = 80, int maxWidth = 1080}) async {
+    try {
+      final bytes = await imageFile.readAsBytes();
+      final image = img.decodeImage(bytes);
+      if (image == null) return imageFile;
+
+      // Resize if needed
+      final resized = img.copyResize(image, width: maxWidth);
+
+      // Encode to JPEG with quality
+      final compressedBytes = img.encodeJpg(resized, quality: quality);
+
+      // Save to temp file
+      final tempDir = path.dirname(imageFile.path);
+      final compressedPath = path.join(tempDir, 'compressed_${path.basename(imageFile.path)}');
+      final compressedFile = File(compressedPath);
+      await compressedFile.writeAsBytes(compressedBytes);
+
+      return compressedFile;
+    } catch (e) {
+      print('Error compressing image: $e');
+      return imageFile;
     }
   }
 

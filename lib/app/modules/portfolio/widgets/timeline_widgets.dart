@@ -1,6 +1,7 @@
 // lib/app/modules/portfolio/widgets/timeline_widgets.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:portefy/app/services/auth_service.dart';
 import '../../../models/portfolio_model.dart';
 import '../../../routes/app_routes.dart';
 import '../controllers/base_portfolio_controller.dart';
@@ -19,6 +20,7 @@ class TimelineItemData {
   final bool isExpiringSoon;
   final List<String>? tags;
   final double? progress;
+  final bool isOwner;
 
   TimelineItemData({
     required this.title,
@@ -33,6 +35,7 @@ class TimelineItemData {
     this.isExpiringSoon = false,
     this.tags,
     this.progress,
+    this.isOwner = false,
   });
 }
 
@@ -122,7 +125,7 @@ class TimelineElement extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
 
-  const TimelineElement({
+  TimelineElement({
     super.key,
     required this.item,
     required this.isFirst,
@@ -223,7 +226,7 @@ class TimelineElement extends StatelessWidget {
                               ),
                             ),
                           ),
-                          _buildItemMenu(item),
+                            _buildItemMenu(item),
                         ],
                       ),
 
@@ -440,6 +443,7 @@ class TimelineItemBuilder {
     EducationModel education,
     int index,
     BasePortfolioController controller,
+    AuthService authService,
   ) {
     return TimelineItemData(
       title: '${education.degree} في ${education.fieldOfStudy}',
@@ -452,6 +456,7 @@ class TimelineItemBuilder {
       onDelete: () => controller.deleteItem(education.id, index),
       onEdit: () => _editItem('education', education, index),
       tags: education.achievements,
+      isOwner: controller.viewedUserId == authService.currentUserId,
     );
   }
 
@@ -459,6 +464,7 @@ class TimelineItemBuilder {
     ExperienceModel experience,
     int index,
     BasePortfolioController controller,
+    AuthService authService,
   ) {
     return TimelineItemData(
       title: experience.position,
@@ -471,6 +477,7 @@ class TimelineItemBuilder {
       onDelete: () => controller.deleteItem(experience.id, index),
       onEdit: () => _editItem('experience', experience, index),
       tags: experience.responsibilities,
+      isOwner: controller.viewedUserId == authService.currentUserId,
     );
   }
 
@@ -478,6 +485,7 @@ class TimelineItemBuilder {
     ProjectModel project,
     int index,
     BasePortfolioController controller,
+    AuthService authService,
   ) {
     return TimelineItemData(
       title: project.title,
@@ -489,6 +497,7 @@ class TimelineItemBuilder {
       onDelete: () => controller.deleteItem(project.id, index),
       onEdit: () => _editItem('projects', project, index),
       tags: project.technologies,
+      isOwner: controller.viewedUserId == authService.currentUserId,
     );
   }
 
@@ -496,6 +505,7 @@ class TimelineItemBuilder {
     SkillModel skill,
     int index,
     BasePortfolioController controller,
+    AuthService authService,
   ) {
     return TimelineItemData(
       title: skill.name,
@@ -507,6 +517,7 @@ class TimelineItemBuilder {
       onDelete: () => controller.deleteItem(skill.id, index),
       onEdit: () => _editItem('skills', skill, index),
       tags: skill.certifications,
+      isOwner: controller.viewedUserId == authService.currentUserId,
     );
   }
 
@@ -514,6 +525,7 @@ class TimelineItemBuilder {
     CertificateModel certificate,
     int index,
     BasePortfolioController controller,
+    AuthService authService,
   ) {
     return TimelineItemData(
       title: certificate.name,
@@ -528,6 +540,7 @@ class TimelineItemBuilder {
       onDelete: () => controller.deleteItem(certificate.id, index),
       onEdit: () => _editItem('certificates', certificate, index),
       tags: certificate.skills,
+      isOwner: controller.viewedUserId == authService.currentUserId,
     );
   }
 
@@ -535,6 +548,7 @@ class TimelineItemBuilder {
     ActivityModel activity,
     int index,
     BasePortfolioController controller,
+    AuthService authService,
   ) {
     return TimelineItemData(
       title: activity.title,
@@ -547,6 +561,7 @@ class TimelineItemBuilder {
       onDelete: () => controller.deleteItem(activity.id, index),
       onEdit: () => _editItem('activities', activity, index),
       tags: activity.skills,
+      isOwner: controller.viewedUserId == authService.currentUserId,
     );
   }
 
@@ -554,6 +569,7 @@ class TimelineItemBuilder {
     HobbyModel hobby,
     int index,
     BasePortfolioController controller,
+    AuthService authService,
   ) {
     return TimelineItemData(
       title: hobby.name,
@@ -564,6 +580,7 @@ class TimelineItemBuilder {
       progress: hobby.proficiency / 5.0,
       onDelete: () => controller.deleteItem(hobby.id, index),
       onEdit: () => _editItem('hobbies', hobby, index),
+      isOwner: controller.viewedUserId == authService.currentUserId,
     );
   }
 
@@ -571,6 +588,7 @@ class TimelineItemBuilder {
     LanguageModel language,
     int index,
     BasePortfolioController controller,
+    AuthService authService,
   ) {
     return TimelineItemData(
       title: language.name,
@@ -580,6 +598,7 @@ class TimelineItemBuilder {
       // progress: language.proficiency / 5.0,
       onDelete: () => controller.deleteItem(language.id, index),
       onEdit: () => _editItem('languages', language, index),
+      isOwner: controller.viewedUserId == authService.currentUserId,
     );
   }
 

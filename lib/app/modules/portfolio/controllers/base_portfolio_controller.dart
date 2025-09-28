@@ -10,7 +10,9 @@ abstract class BasePortfolioController<T extends PortfolioItem> extends GetxCont
   final PortfolioService _portfolioService = PortfolioService();
   final AuthService _authService = Get.find<AuthService>();
   final PaginationService _paginationService = PaginationService();
-  
+
+  String? viewedUserId;
+
   // Pagination variables
   final RxList<T> items = <T>[].obs;
   final RxBool isLoading = false.obs;
@@ -29,11 +31,19 @@ abstract class BasePortfolioController<T extends PortfolioItem> extends GetxCont
   
   // Cache management
   late PaginationCache<T> _cache;
-  String get cacheKey => '${getItemType()}_${_authService.currentUserId}';
+  
+  // دالة للحصول على مفتاح الكاش بناءً على viewedUserId
+  String get cacheKey {
+    final userId = viewedUserId ?? _authService.currentUserId;
+    return '${getItemType()}_$userId';
+  }
   
   @override
   void onInit() {
     super.onInit();
+
+    // تحديث viewedUserId من parameters أو من الـ constructor
+    _updateViewedUserId();
     
     // الحل: استخدام دالة مساعدة للحصول على الكاش المناسب
     _cache = _getTypedCache();
@@ -57,6 +67,12 @@ abstract class BasePortfolioController<T extends PortfolioItem> extends GetxCont
     selectedFilter.listen((_) {
       refreshItems();
     });
+  }
+
+  // دالة لتحديث viewedUserId
+  void _updateViewedUserId() {
+    // الأولوية لـ Get.parameters ثم للقيمة الممررة عبر constructor
+    viewedUserId = Get.parameters['userId'] ?? viewedUserId ?? _authService.currentUserId;
   }
 
   // دالة مساعدة للحصول على الكاش المناسب للنوع
@@ -85,6 +101,15 @@ abstract class BasePortfolioController<T extends PortfolioItem> extends GetxCont
   
   // Load items with pagination
   Future<void> loadItems({bool refresh = false}) async {
+    // تحديث viewedUserId قبل كل تحميل
+    _updateViewedUserId();
+    
+    String? userId = viewedUserId;
+    if (userId == null) {
+      print('Error: userId is null in ${getItemType()} controller');
+      return;
+    }
+    
     if (refresh) {
       _lastDocument = null;
       hasMoreData.value = true;
@@ -100,10 +125,7 @@ abstract class BasePortfolioController<T extends PortfolioItem> extends GetxCont
       } else {
         isLoadingMore.value = true;
       }
-      
-      String? userId = _authService.currentUserId;
-      if (userId == null) return;
-      
+            
       PaginationResult<T> result = await fetchItemsFromService(userId, _lastDocument, pageSize);
       
       if (result.items.isNotEmpty) {
@@ -119,6 +141,7 @@ abstract class BasePortfolioController<T extends PortfolioItem> extends GetxCont
       filterItems();
       
     } catch (e) {
+      print('Error loading ${getItemType()} for user $userId: $e');
       Get.snackbar('خطأ', 'فشل تحميل ${getItemType()}: ${e.toString()}');
     } finally {
       isLoading.value = false;
@@ -152,7 +175,6 @@ abstract class BasePortfolioController<T extends PortfolioItem> extends GetxCont
     });
   }
   
-  
   // Perform search
   Future<void> performSearch(String query) async {
     if (query.isEmpty) {
@@ -162,7 +184,10 @@ abstract class BasePortfolioController<T extends PortfolioItem> extends GetxCont
     
     try {
       isSearching.value = true;
-      String? userId = _authService.currentUserId;
+      // تحديث viewedUserId قبل البحث
+      _updateViewedUserId();
+      
+      String? userId = viewedUserId;
       if (userId == null) return;
       
       // Use local search first (faster)
@@ -289,7 +314,31 @@ abstract class BasePortfolioController<T extends PortfolioItem> extends GetxCont
   
   // Abstract method for deletion
   Future<void> deleteItemFromService(String id);
-  String getCollectionPath();
+  
+  String getCollectionPath() {
+    // تحديث viewedUserId قبل استخدامه
+    _updateViewedUserId();
+    String? userId = viewedUserId;
+    if (userId == null) {
+      throw Exception('User ID is null in ${getItemType()} controller');
+    }
+    return 'users/$userId/portfolio/${getCollectionSubPath()}/items';
+  }
+  
+  // دالة مساعدة للحصول على المسار الفرعي للمجموعة
+  String getCollectionSubPath() {
+    switch (getItemType()) {
+      case 'التعليم': return 'education';
+      case 'الخبرات': return 'experience';
+      case 'المشاريع': return 'projects';
+      case 'المهارات': return 'skills';
+      case 'اللغات': return 'languages';
+      case 'الشهادات': return 'certificates';
+      case 'الأنشطة': return 'activities';
+      case 'الهوايات': return 'hobbies';
+      default: return getItemType().toLowerCase();
+    }
+  }
   
   // Get statistics
   Future<int> getTotalCount() async {
@@ -334,12 +383,6 @@ class EducationController extends BasePortfolioController<EducationModel> {
   String getItemType() => 'التعليم';
   
   @override
-  String getCollectionPath() {
-    String? userId = _authService.currentUserId;
-    return 'users/$userId/portfolio/education/items';
-  }
-  
-  @override
   bool matchesSearchQuery(EducationModel item, String query) {
     return item.institution.toLowerCase().contains(query) ||
            item.degree.toLowerCase().contains(query) ||
@@ -374,12 +417,6 @@ class ExperienceController extends BasePortfolioController<ExperienceModel> {
   
   @override
   String getItemType() => 'الخبرات';
-  
-  @override
-  String getCollectionPath() {
-    String? userId = _authService.currentUserId;
-    return 'users/$userId/portfolio/experience/items';
-  }
   
   @override
   bool matchesSearchQuery(ExperienceModel item, String query) {
@@ -429,12 +466,6 @@ class ProjectsController extends BasePortfolioController<ProjectModel> {
   String getItemType() => 'المشاريع';
   
   @override
-  String getCollectionPath() {
-    String? userId = _authService.currentUserId;
-    return 'users/$userId/portfolio/projects/items';
-  }
-  
-  @override
   bool matchesSearchQuery(ProjectModel item, String query) {
     return item.title.toLowerCase().contains(query) ||
            item.description.toLowerCase().contains(query);
@@ -482,12 +513,6 @@ class SkillsController extends BasePortfolioController<SkillModel> {
   String getItemType() => 'المهارات';
   
   @override
-  String getCollectionPath() {
-    String? userId = _authService.currentUserId;
-    return 'users/$userId/portfolio/skills/items';
-  }
-  
-  @override
   bool matchesSearchQuery(SkillModel item, String query) {
     return item.name.toLowerCase().contains(query) ||
            item.category.toLowerCase().contains(query);
@@ -521,12 +546,6 @@ class LanguagesController extends BasePortfolioController<LanguageModel> {
   
   @override
   String getItemType() => 'اللغات';
-  
-  @override
-  String getCollectionPath() {
-    String? userId = _authService.currentUserId;
-    return 'users/$userId/portfolio/languages/items';
-  }
   
   @override
   bool matchesSearchQuery(LanguageModel item, String query) {
@@ -565,12 +584,6 @@ class CertificatesController extends BasePortfolioController<CertificateModel> {
   
   @override
   String getItemType() => 'الشهادات';
-  
-  @override
-  String getCollectionPath() {
-    String? userId = _authService.currentUserId;
-    return 'users/$userId/portfolio/certificates/items';
-  }
   
   @override
   bool matchesSearchQuery(CertificateModel item, String query) {
@@ -622,12 +635,6 @@ class ActivitiesController extends BasePortfolioController<ActivityModel> {
   String getItemType() => 'الأنشطة';
   
   @override
-  String getCollectionPath() {
-    String? userId = _authService.currentUserId;
-    return 'users/$userId/portfolio/activities/items';
-  }
-  
-  @override
   bool matchesSearchQuery(ActivityModel item, String query) {
     return item.title.toLowerCase().contains(query) ||
            item.organization.toLowerCase().contains(query) ||
@@ -668,12 +675,6 @@ class HobbiesController extends BasePortfolioController<HobbyModel> {
   
   @override
   String getItemType() => 'الهوايات';
-  
-  @override
-  String getCollectionPath() {
-    String? userId = _authService.currentUserId;
-    return 'users/$userId/portfolio/hobbies/items';
-  }
   
   @override
   bool matchesSearchQuery(HobbyModel item, String query) {

@@ -1,3 +1,4 @@
+import 'package:flutter/painting.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,10 +6,12 @@ import 'dart:async';
 import '../../../models/post_model.dart';
 import '../../../services/post_service.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/storage_service.dart';
 
 abstract class BasePostsController extends GetxController {
   final PostService _postService = PostService();
   final AuthService _authService = Get.find<AuthService>();
+  final StorageService _storageService = Get.put(StorageService());
 
   // Observables
   final RxList<PostModel> posts = <PostModel>[].obs;
@@ -238,14 +241,18 @@ abstract class BasePostsController extends GetxController {
     super.onClose();
   }
 
-  void deletePost(String id) async {
+  void deletePost(PostModel post) async {
     isLoading.value = true;
 
     try {
-      // ne9es delete images
+      if (post.imageUrls.isNotEmpty) {
+        for (var image in post.imageUrls) {
+          await _storageService.deleteFile(image);
+        }
+      }
       
-      posts.removeWhere((post) => post.id == id);
-      await _postService.deletePost(id);
+      posts.removeWhere((post) => post.id == post.id);
+      await _postService.deletePost(post.id);
     } catch (e) {
       throw '${e.toString()}';
     } finally {

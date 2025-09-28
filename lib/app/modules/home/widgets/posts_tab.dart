@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:portefy/app/modules/portfolio/views/portfolio_view.dart';
 import 'package:portefy/app/routes/app_routes.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../../models/post_report_model.dart';
@@ -15,8 +16,9 @@ import '../controllers/home_controller.dart';
 class PostsTab extends StatelessWidget {
   final BasePostsController controller;
   final ShareService _shareService = ShareService();
+  final bool isTap;
 
-  PostsTab({super.key, required this.controller});
+  PostsTab({super.key, required this.controller, this.isTap = false});
 
   @override
   Widget build(BuildContext context) {
@@ -341,7 +343,11 @@ class PostsTab extends StatelessWidget {
             ],
           ),
           child: InkWell(
-            onTap: () => Get.toNamed(AppRoutes.PORTFOLIO, arguments: {'userId': post.userId}),
+            onTap: () {
+              if (!isTap) {
+                Get.to(PortfolioView(userId: post.userId));
+              }
+            },
             child: CircleAvatar(
               radius: 22,
               backgroundColor: AppColors.primary.withOpacity(0.1),
@@ -359,12 +365,17 @@ class PostsTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                post.authorName,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
+              InkWell(
+                onTap: () {
+                  if (!isTap) Get.to(PortfolioView(userId: post.userId));
+                },
+                child: Text(
+                  post.authorName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               if (post.authorInfoText.isNotEmpty) ...[
@@ -818,7 +829,7 @@ class PostsTab extends StatelessWidget {
             onPressed: () {
               Get.back();
               // Implement delete functionality
-              controller.deletePost(post.id);
+              controller.deletePost(post);
               Get.snackbar('تم الحذف', 'تم حذف المنشور بنجاح');
             },
             style: ElevatedButton.styleFrom(

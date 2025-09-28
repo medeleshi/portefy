@@ -138,15 +138,6 @@ class PostsController extends GetxController {
     }
   }
 
-  Future<void> deletePost(String postId) async {
-    try {
-      await _postService.deletePost(postId);
-      Get.snackbar('نجح', 'تم حذف المنشور بنجاح');
-    } catch (e) {
-      Get.snackbar('خطأ', 'فشل حذف المنشور: ${e.toString()}');
-    }
-  }
-
   // Image handling methods
   Future<void> pickImages() async {
     try {
